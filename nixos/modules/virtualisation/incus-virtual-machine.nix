@@ -28,6 +28,16 @@ in
       copyChannel = true;
     };
 
+    system.build.incusUnifiedTarball = pkgs.runCommand "makeUnifiedTarball" { } ''
+      cd $(mktemp -d)
+      diskImage=( ${config.system.build.qemuImage}/*.qcow2 )
+      ln -s $diskImage rootfs.img
+      metadataTarball=( ${config.system.build.metadata}/tarball/*.tar.xz )
+      tar -xf $metadataTarball metadata.yaml
+      mkdir $out
+      tar --dereference -cJf $out/${config.system.name}-${config.system.nixos.label}-unifiedIncusTarball.tar.xz rootfs.img metadata.yaml
+    '';
+
     fileSystems = {
       "/" = {
         device = "/dev/disk/by-label/nixos";
